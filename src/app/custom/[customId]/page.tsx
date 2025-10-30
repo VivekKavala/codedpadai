@@ -40,6 +40,7 @@ export default async function CustomIdRedirectPage({
   params: Promise<{ customId: string }>;
 }) {
   const { customId } = await params;
+  console.log(customId);
 
   if (!customId) {
     // This case is unlikely due to Next.js routing, but good to have
