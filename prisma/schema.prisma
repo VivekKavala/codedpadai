@@ -1,0 +1,179 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma" // Adjusted path
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String? // Your custom field
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts Account[]
+  sessions Session[]
+  pads     Pad[] // Your custom relation
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts") // Added map
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions") // Added map
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens") // Added map
+}
+
+// --- UPDATED MODEL ---
+// The Pad model no longer has a 'content' field.
+// It now has a one-to-many relationship with 'PadFile'.
+model Pad {
+  id         String     @id @default(cuid())
+  customId   String?    @unique
+  title      String
+  // content    String     @db.Text // --- REMOVED --- This is now handled by the PadFile model
+  visibility Visibility @default(PUBLIC) // Enum: PUBLIC, PROTECTED, PRIVATE
+  isListed   Boolean    @default(true) // For PUBLIC pads: show in explore?
+
+  // Security & Encryption
+  encrypted   Boolean @default(false)
+  passphrase  String? // Hashed passphrase for PROTECTED pads
+  hideCreator Boolean @default(false) // Hide creator name publicly? (Still linked via userId)
+
+  // Access Control
+  editPermission EditPermission @default(ANYONE) // Enum: ANYONE, ACCESS_KEY
+  editAccessKey  String? // Hashed key for edit access
+  linkOnlyAccess Boolean        @default(false) // Require token for anonymous/public access?
+  shareToken     String?        @unique // Secret token for link-only access
+
+  // Expiry Settings
+  expiresAt        DateTime?
+  maxViews         Int? // Max views before expiry
+  burnAfterReading Boolean   @default(false)
+
+  // Content Protection
+  disableCopy Boolean @default(false)
+
+  // Analytics
+  views        Int       @default(0)
+  uniqueViews  Int       @default(0)
+  lastViewedAt DateTime?
+
+  // Audit & Monitoring
+  enableAuditLogs Boolean @default(false)
+  notifyOnView    Boolean @default(false) // Currently disabled in UI
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId String? // Link to creator user
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull) // SetNull keeps pad if user deleted
+
+  // --- ADDED RELATION ---
+  // A Pad can now have multiple files (tabs)
+  files PadFile[]
+
+  // Audit logs
+  auditLogs AuditLog[]
+
+  @@index([customId])
+  @@index([userId])
+  // Index for explore page query
+  @@index([visibility, isListed, expiresAt])
+  @@index([expiresAt]) // For cleanup jobs
+  @@index([shareToken])
+  @@map("pads")
+}
+
+// --- NEW MODEL ---
+// This model represents a single tab (file) within a Pad.
+model PadFile {
+  id      String @id @default(cuid())
+  title   String // The name on the tab, e.g., "Tab 1" or "script.js"
+  content String @db.Text // The code/text content for this specific tab
+  order   Int // The tab number (1, 2, 3...) for ordering in the UI
+
+  // Relation to the parent Pad
+  padId String
+  pad   Pad    @relation(fields: [padId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Index to quickly fetch files for a pad in the correct order
+  @@index([padId, order])
+  @@map("pad_files")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  padId     String
+  action    String // VIEW, EDIT, DELETE, CREATE etc.
+  ipAddress String?
+  userAgent String?
+  timestamp DateTime @default(now())
+
+  // Relations
+  pad Pad @relation(fields: [padId], references: [id], onDelete: Cascade) // Cascade delete logs when pad is deleted
+
+  @@index([padId, timestamp])
+  @@map("audit_logs")
+}
+
+// Updated Enum
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  PROTECTED
+}
+
+enum EditPermission {
+  ANYONE
+  ACCESS_KEY
+}

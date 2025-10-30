@@ -1,0 +1,14 @@
+version: '3.8' # Specifies the version of the Docker Compose file format
+
+services: # Defines all the different services (containers) your app needs
+  app: # The name of our service (you can call it anything, e.g., 'web')
+    image: codedpadai # Use the image we built with 'docker build -t codedpadai .'
+    build: . # Or, 'docker compose' can build it for you from the current directory
+    ports:
+      - '3000:3000' # Map port 3000 on your computer to port 3000 in the container
+    env_file:
+      - production.env # <-- This is the change we discussed. It loads your local .env file
+
+networks:
+  default:
+    driver: bridge
