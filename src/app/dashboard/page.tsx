@@ -95,7 +95,7 @@ export default async function DashboardPage({
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <div className="flex items-center space-x-4">
             <Link
-              href="//create"
+              href="/create"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
               Create New Pad
@@ -170,7 +170,7 @@ export default async function DashboardPage({
                       : 'No pads yet.'}
                   </p>
                   <Link
-                    href="//create"
+                    href="/create"
                     className="mt-2 inline-block text-blue-600 hover:text-blue-500"
                   >
                     Create your first pad →
