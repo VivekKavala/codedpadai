@@ -13,6 +13,9 @@ import Header from '@/components/Header';
 import { Toaster } from 'sonner';
 import ToolTip from '@/components/ToolTip';
 import CookieConsentBanner from '@/components/CookieConsent';
+import Script from 'next/script';
+import Analytics from '@/components/Analytics';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'CodedPadAI - Share and Store Code Securely',
@@ -51,6 +54,24 @@ export default function RootLayout({
       <body
         className={`${poppins.className} antialiased bg-white text-gray-900`}
       >
+        <Script
+          strategy="afterInteractive"
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
+                page_path: window.location.pathname,
+              });
+            `,
+          }}
+        />
         <NextTopLoader
           color="#155dfc" // customize color
           height={4} // thickness of the bar
@@ -76,6 +97,9 @@ export default function RootLayout({
             },
           }}
         />
+        <Suspense>
+          <Analytics />
+        </Suspense>
         <Header />
         {children}
         <CookieConsentBanner />
