@@ -27,50 +27,50 @@ const FeaturesPage: React.FC = () => {
   const securityFeatures = [
     {
       icon: Lock,
-      title: 'AES-256 Encryption',
+      title: 'AES-256-GCM Encryption',
       description:
-        'Military-grade encryption standard that protects your sensitive content. When you enable encryption, your data is secured with AES-256 before leaving your browser.',
+        'Industry-standard encryption using the Web Crypto API. When enabled, your content is encrypted in your browser before transmission using AES-256-GCM.',
       details: [
-        'Client-side encryption - content encrypted in your browser',
-        'User-controlled encryption - choose to encrypt or not at pad creation',
-        'Passphrase-protected decryption',
-        'Zero-knowledge architecture - we cannot read encrypted content',
+        'Client-side encryption using Web Crypto API',
+        'AES-256-GCM (Galois/Counter Mode)',
+        'PBKDF2 key derivation from passphrase',
+        'Server stores only encrypted ciphertext',
       ],
     },
     {
       icon: Key,
       title: 'Edit Access Control',
       description:
-        'Control who can modify your pads with optional edit access keys. Perfect for collaborative environments where you want to limit editing permissions.',
+        'Optional access keys for edit permissions. Edit access keys are hashed (bcrypt) and stored separately from view credentials.',
       details: [
-        'Optional edit access key for additional security',
-        'Only authorized users with the key can edit',
-        'Separate from view permissions',
-        'Hashed and securely stored',
+        'Optional edit access key for write protection',
+        'Hashed with bcrypt before storage',
+        'Independent from view permissions',
+        'Per-pad configuration',
       ],
     },
     {
       icon: Shield,
-      title: 'Protected Pads',
+      title: 'Password Protection',
       description:
-        'Create password-protected pads that require a passphrase to view. Ideal for sharing confidential information with specific people.',
+        'Passphrase-protected pads for controlled access. Passphrases are hashed server-side before comparison.',
       details: [
-        'Passphrase required to view content',
-        'Works independently from edit access keys',
-        'Passphrases are hashed with bcrypt',
-        'No limit on passphrase complexity',
+        'Passphrase required for viewing',
+        'Bcrypt hashing for storage',
+        'Separate from encryption keys',
+        'Configurable per pad',
       ],
     },
     {
       icon: Link2,
-      title: 'Link-Only Access',
+      title: 'Token-Based Access',
       description:
-        'Prevent direct URL access to your pads. Users need a special share token to view the content, adding an extra layer of security.',
+        'Share tokens provide an additional access control layer. Each pad can have a unique access token to prevent direct URL access.',
       details: [
-        'Unique share token for each pad',
+        'Unique token per pad',
         'Prevents unauthorized direct access',
-        'Token required for viewing',
-        'Perfect for controlled sharing',
+        'Optional per-pad setting',
+        'Revocable by deleting pad',
       ],
     },
   ];
@@ -317,10 +317,10 @@ const FeaturesPage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Security & Encryption
+              Security Features
             </h2>
             <p className="text-lg text-gray-600">
-              Military-grade security to keep your secrets safe
+              Transparent security implementation details
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-8">

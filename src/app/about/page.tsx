@@ -17,27 +17,27 @@ const AboutPage: React.FC = () => {
   const features = [
     {
       icon: Lock,
-      title: 'End-to-End Encryption',
+      title: 'Client-Side Encryption',
       description:
-        'Your secrets remain yours. We use client-side encryption with user-generated keys, ensuring even we cannot access your encrypted content.',
+        'Your content is encrypted in your browser using AES-256-GCM before transmission. We cannot decrypt your encrypted pads without your passphrase.',
     },
     {
       icon: Zap,
       title: 'Modern Interface',
       description:
-        'A clean, intuitive, and lightning-fast interface designed for the modern web. No clutter, just functionality.',
+        'A clean, intuitive, and fast interface built with Next.js. Focused on usability without unnecessary features.',
     },
     {
       icon: Shield,
-      title: 'Privacy First',
+      title: 'Privacy Focused',
       description:
-        'We respect your privacy above all else. Your encrypted pads are truly private - not even our servers can decrypt them.',
+        'We do not track, sell, or analyze your encrypted content. What you encrypt stays encrypted.',
     },
     {
       icon: Users,
-      title: 'Free for Everyone',
+      title: 'Free and Open',
       description:
-        'No paywalls, no premium tiers, no advertisements. CodedPadAI is completely free and accessible to all.',
+        'No paywalls, no premium tiers, no advertisements. Completely free for everyone to use.',
     },
   ];
 
@@ -216,7 +216,7 @@ const AboutPage: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Security Excellence
+                  Security Implementation
                 </h3>
                 <div className="bg-white rounded-lg p-6 border-2 border-blue-200">
                   <div className="flex items-start gap-3 mb-3">
@@ -226,14 +226,31 @@ const AboutPage: React.FC = () => {
                     />
                     <div>
                       <h4 className="font-bold text-gray-900 mb-2">
-                        End-to-End Encryption
+                        Client-Side Encryption
                       </h4>
-                      <p className="text-sm text-gray-700">
-                        We're incredibly proud of our implementation of true
-                        end-to-end encryption. Your content is encrypted in your
-                        browser with a key only you possess. Decryption happens
-                        exclusively on your device - never on our servers.
+                      <p className="text-sm text-gray-700 mb-3">
+                        When you enable encryption, your content is encrypted
+                        locally in your browser using the Web Crypto API with
+                        AES-256-GCM before being transmitted to our servers.
                       </p>
+                      <ul className="text-sm text-gray-700 space-y-1">
+                        <li>
+                          • <strong>Algorithm:</strong> AES-256-GCM
+                          (Galois/Counter Mode)
+                        </li>
+                        <li>
+                          • <strong>Key Derivation:</strong> PBKDF2 with
+                          user-provided passphrase
+                        </li>
+                        <li>
+                          • <strong>Implementation:</strong> Browser Web Crypto
+                          API
+                        </li>
+                        <li>
+                          • <strong>Server Access:</strong> None - we only store
+                          encrypted data
+                        </li>
+                      </ul>
                     </div>
                   </div>
                 </div>
@@ -313,11 +330,10 @@ const AboutPage: React.FC = () => {
           <Users className="mx-auto mb-6 text-blue-200" size={48} />
           <h2 className="text-3xl font-bold mb-6">Built for Everyone</h2>
           <p className="text-xl text-blue-100 leading-relaxed">
-            CodedPadAI isn't built for a specific audience - it's for anyone who
-            needs to share information securely. Whether you're a developer
-            sharing code snippets, a student collaborating on notes, a
-            professional handling sensitive documents, or just someone who
-            values privacy - CodedPadAI is here for you.
+            CodedPadAI is designed for anyone who needs to share text securely.
+            Whether you're a developer sharing code, a student sharing notes, or
+            anyone who values privacy - our service is straightforward and
+            accessible.
           </p>
         </div>
       </section>

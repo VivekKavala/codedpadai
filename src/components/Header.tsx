@@ -19,12 +19,6 @@ export default async function Header() {
         <div className="flex items-center">
           <div className="flex items-center gap-2">
             <Link
-              href="/"
-              className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors items-center gap-2 md:flex hidden"
-            >
-              Home
-            </Link>
-            <Link
               href="/explore"
               className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors flex items-center gap-2 md:flex hidden"
             >
@@ -35,6 +29,12 @@ export default async function Header() {
               className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors items-center gap-2 md:flex hidden"
             >
               Features
+            </Link>
+            <Link
+              href="/security"
+              className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors items-center gap-2 md:flex hidden"
+            >
+              Security
             </Link>
             <Link
               href="/how-it-works"
