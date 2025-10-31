@@ -1,12 +1,30 @@
 // app/api/pad/custom/[customId]/route.ts
 
 import { NextResponse } from 'next/server';
-// Use the correct path to your Prisma singleton
 import { prisma } from '@/lib/prisma';
 
 /**
- * Checks for the existence of a pad by its customId and returns
- * its main database ID if found.
+ * Utility function to normalize custom IDs to lowercase
+ */
+function normalizeCustomId(customId: string | null | undefined): string | null {
+  if (!customId) return null;
+
+  // Trim whitespace and convert to lowercase
+  const normalized = customId.trim().toLowerCase();
+
+  // Validate format (only lowercase letters, numbers, hyphens, underscores)
+  const isValid = /^[a-z0-9-_]+$/.test(normalized);
+
+  if (!isValid) {
+    return null;
+  }
+
+  return normalized;
+}
+
+/**
+ * Checks for the existence of a pad by its customId (case-insensitive)
+ * and returns its main database ID if found.
  */
 export async function POST(
   req: Request,
@@ -21,11 +39,24 @@ export async function POST(
     );
   }
 
+  // Normalize the custom ID to lowercase
+  const normalizedCustomId = normalizeCustomId(customId);
+
+  if (!normalizedCustomId) {
+    return NextResponse.json(
+      {
+        error:
+          'Invalid custom ID format. Only letters, numbers, hyphens, and underscores are allowed.',
+      },
+      { status: 400 }
+    );
+  }
+
   try {
-    // Use 'prisma' as imported
+    // Use findFirst for case-insensitive lookup
     const pad = await prisma.pad.findUnique({
       where: {
-        customId: customId,
+        customId: normalizedCustomId, // Search with lowercase version
       },
       select: {
         id: true, // Only select the database ID

@@ -21,7 +21,7 @@ export default async function DashboardPage({
   const session = await auth();
 
   if (!session?.user) {
-    redirect('/sign-in');
+    redirect('/auth/sign-in');
   }
 
   const searchParamsValues = await searchParams;

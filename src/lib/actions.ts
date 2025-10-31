@@ -1,11 +1,30 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { hashPassphrase } from '@/lib/encryption'; // Assuming this import
-import { ApiResponse } from '@/lib/types'; // <-- FIX: Removed 'Pad' from import
+import { hashPassphrase } from '@/lib/encryption';
+import { ApiResponse } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 
-// --- FIX: Manually define PadFile type to avoid import error ---
+// --- Utility function for normalizing custom IDs ---
+function normalizeCustomId(customId: string | null | undefined): string | null {
+  if (!customId) return null;
+
+  // Trim whitespace and convert to lowercase
+  const normalized = customId.trim().toLowerCase();
+
+  // Validate format (only lowercase letters, numbers, hyphens, underscores)
+  const isValid = /^[a-z0-9-_]+$/.test(normalized);
+
+  if (!isValid) {
+    throw new Error(
+      'Custom ID can only contain lowercase letters, numbers, hyphens, and underscores'
+    );
+  }
+
+  return normalized;
+}
+
+// --- Manual type definitions ---
 interface PadFile {
   id: string;
   title: string;
@@ -15,9 +34,7 @@ interface PadFile {
   createdAt: Date;
   updatedAt: Date;
 }
-// --- END FIX ---
 
-// --- FIX: Manually define Pad type based on NEW schema ---
 interface Pad {
   id: string;
   customId: string | null;
@@ -44,9 +61,7 @@ interface Pad {
   updatedAt: Date;
   userId: string | null;
 }
-// --- END FIX ---
 
-// Define a more complete Pad type that includes the files
 export type PadWithFiles = Pad & {
   files: PadFile[];
   user: {
@@ -56,8 +71,6 @@ export type PadWithFiles = Pad & {
   } | null;
 };
 
-// Define the input for the createPad function, matching the new schema
-// This should mirror the fields from your CreatePadForm
 interface PadCreateInput {
   title: string;
   visibility: 'PUBLIC' | 'PRIVATE' | 'PROTECTED';
@@ -66,7 +79,6 @@ interface PadCreateInput {
   encrypted: boolean;
   userId?: string;
   hideCreator: boolean;
-  // Add other fields from your schema that you collect in the form
   expiresAt?: string | null;
   maxViews?: number;
   burnAfterReading?: boolean;
@@ -76,7 +88,6 @@ interface PadCreateInput {
   shareToken?: string;
   editPermission?: 'ANYONE' | 'ACCESS_KEY';
   editAccessKey?: string;
-
   files: {
     title: string;
     content: string;
@@ -89,15 +100,23 @@ export async function createPad(
   customId?: string
 ): Promise<ApiResponse<Pad>> {
   try {
-    // ---
-    // You would add all your advanced validation here (title, files, etc.)
-    // ---
-
     // Validate passphrase if provided
     if (data.visibility === 'PROTECTED' && !data.passphrase?.trim()) {
       return {
         success: false,
         error: 'Passphrase is required for protected pads',
+      };
+    }
+
+    // --- NORMALIZE CUSTOM ID TO LOWERCASE ---
+    let normalizedCustomId: string | null = null;
+    try {
+      normalizedCustomId = normalizeCustomId(customId);
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Invalid custom ID format',
       };
     }
 
@@ -113,10 +132,12 @@ export async function createPad(
       hashedEditAccessKey = await hashPassphrase(data.editAccessKey);
     }
 
-    // Check if pad with custom ID already exists
-    if (customId) {
-      const existingPad = await prisma.pad.findUnique({
-        where: { customId: customId }, // <-- FIX: Check 'customId' field
+    // Check if pad with custom ID already exists (case-insensitive check)
+    if (normalizedCustomId) {
+      const existingPad = await prisma.pad.findFirst({
+        where: {
+          customId: normalizedCustomId, // Already lowercase
+        },
       });
 
       if (existingPad) {
@@ -130,7 +151,7 @@ export async function createPad(
     // Create pad in database
     const pad = await prisma.pad.create({
       data: {
-        customId: customId || undefined, // <-- FIX: Set 'customId' field
+        customId: normalizedCustomId || undefined, // Store lowercase version
         title: data.title.trim() || 'Untitled Pad',
         visibility: data.visibility,
         isListed: data.isListed,
@@ -148,7 +169,6 @@ export async function createPad(
         editPermission: data.editPermission,
         editAccessKey: hashedEditAccessKey,
 
-        // --- FIX: Create files in a nested transaction ---
         files: {
           create: data.files.map((file) => ({
             title: file.title,
@@ -161,8 +181,8 @@ export async function createPad(
 
     revalidatePath('/explore');
     revalidatePath(`/pad/${pad.id}`);
-    if (customId) {
-      revalidatePath(`/custom/${customId}`);
+    if (normalizedCustomId) {
+      revalidatePath(`/${normalizedCustomId}`);
     }
 
     return {
@@ -178,14 +198,25 @@ export async function createPad(
   }
 }
 
-// --- NEW FUNCTION ---
-// Needed for your [customId]/page.tsx resolver
+// --- GET PAD BY CUSTOM ID (with lowercase normalization) ---
 export async function getPadByCustomId(
   customId: string
 ): Promise<ApiResponse<PadWithFiles>> {
   try {
-    const pad = await prisma.pad.findUnique({
-      where: { customId },
+    // Normalize the input customId to lowercase for lookup
+    const normalizedCustomId = normalizeCustomId(customId);
+
+    if (!normalizedCustomId) {
+      return {
+        success: false,
+        error: 'Invalid custom ID',
+      };
+    }
+
+    const pad = await prisma.pad.findFirst({
+      where: {
+        customId: normalizedCustomId, // Case-insensitive lookup
+      },
       include: {
         user: {
           select: {
@@ -196,7 +227,7 @@ export async function getPadByCustomId(
         },
         files: {
           orderBy: {
-            order: 'asc', // Get files in the correct tab order
+            order: 'asc',
           },
         },
       },
@@ -211,7 +242,7 @@ export async function getPadByCustomId(
 
     // Increment view count
     await prisma.pad.update({
-      where: { id: pad.id }, // Update by the *primary key*
+      where: { id: pad.id },
       data: {
         views: {
           increment: 1,
@@ -233,7 +264,7 @@ export async function getPadByCustomId(
   }
 }
 
-// --- UPDATED FUNCTION ---
+// --- GET PAD BY ID (unchanged, but keeping for completeness) ---
 export async function getPad(id: string): Promise<ApiResponse<PadWithFiles>> {
   try {
     const pad = await prisma.pad.findUnique({
@@ -248,7 +279,7 @@ export async function getPad(id: string): Promise<ApiResponse<PadWithFiles>> {
         },
         files: {
           orderBy: {
-            order: 'asc', // Get files in the correct tab order
+            order: 'asc',
           },
         },
       },
@@ -285,10 +316,9 @@ export async function getPad(id: string): Promise<ApiResponse<PadWithFiles>> {
   }
 }
 
-// --- UPDATED FUNCTION ---
-// This type is for the explore page, showing just one file
+// --- GET PUBLIC PADS (unchanged) ---
 export type PadWithFirstFile = Pad & {
-  files: PadFile[]; // Will only contain one file
+  files: PadFile[];
   user: {
     id: string;
     name: string | null;
@@ -303,8 +333,8 @@ export async function getPublicPads(
     const pads = await prisma.pad.findMany({
       where: {
         visibility: 'PUBLIC',
-        isListed: true, // Only show pads meant for the explore page
-        expiresAt: null, // Don't show expired pads
+        isListed: true,
+        expiresAt: null,
       },
       include: {
         user: {
@@ -315,7 +345,6 @@ export async function getPublicPads(
           },
         },
         files: {
-          // Optimization: Only take the first file for the preview
           take: 1,
           orderBy: {
             order: 'asc',

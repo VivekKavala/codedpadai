@@ -7,7 +7,14 @@ export default auth((req) => {
   const isAuthenticated = !!req.auth;
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/sign-in', '/sign-up', '/api/auth'];
+  const publicRoutes = [
+    '/',
+    '/auth/sign-in',
+    '/auth/sign-up',
+    '/auth/forgot-password',
+    '/auth/reset-password',
+    '/api/auth',
+  ];
 
   // Protected routes that require authentication
   const protectedRoutes = ['/dashboard', '/profile'];
@@ -21,13 +28,16 @@ export default auth((req) => {
   );
 
   // Redirect authenticated users away from auth pages
-  if (isAuthenticated && (pathname === '/sign-in' || pathname === '/sign-up')) {
+  if (
+    isAuthenticated &&
+    (pathname === '/auth/sign-in' || pathname === '/auth/sign-up')
+  ) {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
   // Redirect unauthenticated users from protected routes
   if (!isAuthenticated && isProtectedRoute) {
-    const signInUrl = new URL('/sign-in', req.url);
+    const signInUrl = new URL('/auth/sign-in', req.url);
     signInUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(signInUrl);
   }

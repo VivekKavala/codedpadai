@@ -194,6 +194,15 @@ export function ProfileClient({ user }: ProfileClientProps) {
           </div>
         </div>
 
+        <div className="mt-6 flex justify-center">
+          <a
+            href="/dashboard"
+            className="text-blue-600 hover:text-blue-500 text-sm font-medium"
+          >
+            Go to Dashboard
+          </a>
+        </div>
+
         {/* Danger Zone Card */}
         <div className="bg-white shadow-lg overflow-hidden sm:rounded-lg border border-red-300">
           <div className="px-4 py-5 sm:px-6 bg-red-50 border-b border-red-200">
@@ -267,16 +276,6 @@ export function ProfileClient({ user }: ProfileClientProps) {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Go to Dashboard Link */}
-        <div className="mt-6 flex justify-center">
-          <a
-            href="/dashboard"
-            className="text-blue-600 hover:text-blue-500 text-sm font-medium"
-          >
-            Go to Dashboard
-          </a>
         </div>
       </div>
     </div>

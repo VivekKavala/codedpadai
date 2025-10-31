@@ -9,7 +9,7 @@ export default async function Header() {
 
   return (
     <header className="w-full flex justify-center items-center bg-white/80 backdrop-blur-sm shadow-sm top-0 z-50">
-      <div className="max-w-[1500px] w-full px-4 flex justify-between">
+      <div className="max-w-[1500px] w-full px-2 md:px-4 flex justify-between">
         <div className="flex items-center">
           <MobileMenu />
           <div className="p-2">
@@ -43,12 +43,12 @@ export default async function Header() {
               How it works
             </Link>
             {session?.user ? (
-              <Link href="/profile">
+              <Link href="/profile" className="px-2">
                 <User className="w-4 h-4" />
               </Link>
             ) : (
               <Link
-                href="/sign-in"
+                href="/auth/sign-in"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors flex items-center gap-2"
               >
                 Sign In
