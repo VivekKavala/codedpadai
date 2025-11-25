@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { hashPassphrase } from '@/lib/encryption';
 import { ApiResponse } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/lib/auth';
 
 // --- Utility function for normalizing custom IDs ---
 function normalizeCustomId(customId: string | null | undefined): string | null {
@@ -100,6 +101,8 @@ export async function createPad(
   customId?: string
 ): Promise<ApiResponse<Pad>> {
   try {
+    const session = await auth();
+
     // Validate passphrase if provided
     if (data.visibility === 'PROTECTED' && !data.passphrase?.trim()) {
       return {
@@ -157,7 +160,7 @@ export async function createPad(
         isListed: data.isListed,
         encrypted: data.encrypted,
         passphrase: hashedPassphrase,
-        userId: data.userId || undefined,
+        userId: session?.user?.id || undefined,
         hideCreator: data.hideCreator,
         expiresAt: data.expiresAt || undefined,
         maxViews: data.maxViews || undefined,

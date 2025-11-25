@@ -7,7 +7,11 @@ const IV_LENGTH = 16; // 128 bits
 const TAG_LENGTH = 16; // 128 bits
 
 // Generate a random encryption key (in production, store this securely)
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(KEY_LENGTH);
+if (!process.env.ENCRYPTION_KEY) {
+  throw new Error('ENCRYPTION_KEY environment variable is not set');
+}
+
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 
 export interface EncryptedData {
   encrypted: string;

@@ -111,6 +111,6 @@ export async function POST(
 
     return NextResponse.json({ success: true, message: 'View logged' });
   } catch (error) {
-    console.log('Some Error occured: ', error);
+    console.error('Error in view logging:', error instanceof Error ? error.message : 'Unknown error');
   }
 }
