@@ -1,5 +1,11 @@
 # CodedPadAI
 
+![License](https://img.shields.io/github/license/VivekKavala/codedpadai)
+![Issues](https://img.shields.io/github/issues/VivekKavala/codedpadai)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+
+[Contributing](CONTRIBUTING.md) | [Code of Conduct](CODE_OF_CONDUCT.md)
+
 A modern, secure sharing platform for storing, protecting, and sharing code snippets, text notes, and secrets. Built with Next.js 14, TypeScript, and Prisma.
 
 ## 🌟 Features

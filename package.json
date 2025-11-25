@@ -1,7 +1,12 @@
 {
   "name": "codedpadai",
   "version": "0.1.0",
-  "private": true,
+  "license": "MIT",
+  "author": "Vivek Kavala",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VivekKavala/codedpadai.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
