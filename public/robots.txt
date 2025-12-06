@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Disallow Next.js internal files
+Disallow: /_next/
+Disallow: /static/
+
+# (Optional) Block API routes from being indexed
+Disallow: /api/
+
+# Your sitemap URL
+Sitemap: https://codedpadai.com/sitemap.xml
